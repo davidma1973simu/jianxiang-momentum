@@ -321,6 +321,7 @@ const styles = StyleSheet.create({
   stopSub: { marginTop: 20, fontSize: 16, color: colors.dimText, letterSpacing: 1 },
   stage4: {
     ...StyleSheet.absoluteFillObject,
+    flex: 1,
     alignItems: 'center',
     paddingTop: '12%',
     paddingHorizontal: 24,
@@ -352,19 +353,16 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   deepText: {
-    fontSize: 12,
-    color: colors.inkSoft,
-    opacity: 0.65,
-    letterSpacing: 0.5,
-    textDecorationLine: 'underline',
-    textDecorationColor: 'rgba(146,139,126,0.3)',
+    fontSize: 13,
+    color: colors.accent,
+    letterSpacing: 0.4,
   },
   deepDot: {
     width: 3,
     height: 3,
     borderRadius: 2,
-    backgroundColor: colors.inkSoft,
-    opacity: 0.35,
+    backgroundColor: colors.accent,
+    opacity: 0.5,
   },
   footer: {
     flexDirection: 'row',
