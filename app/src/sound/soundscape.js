@@ -13,7 +13,7 @@ const SOURCES = {
   touch: require('../../assets/sound/touch-ripple.wav'),
 };
 
-const BGM_VOLUME = 0.25; // BGM 低音量，不喧宾夺主
+const BGM_VOLUME = 0.22; // BGM 低音量（用户要求降低10%），不喧宾夺主
 
 // 默认音量极低 —— 视觉才是主通道，声音只是草原的回声
 const VOLUME = {
@@ -71,14 +71,33 @@ export async function play(key) {
   }
 }
 
-// 启动 BGM（极低音量循环播放花之圆舞曲风格背景）
+// 启动 BGM（花之圆舞曲原版，先预下载到内存再播放，消除网络卡顿）
 export function startBGM() {
   if (muted || !bgmPlayer || !bgmLoaded) return;
   try {
-    bgmPlayer.seekTo(0);
+    // Web: 先用 fetch 把整个 MP3 下载到内存，转成 Blob URL 再播
+    // 这样播的是本地内存数据，不依赖网络，不会断断续续
+    const uri = bgmPlayer.src?.uri;
+    if (typeof window !== 'undefined' && window.fetch && window.URL && uri) {
+      fetch(uri)
+        .then((r) => r.blob())
+        .then((blob) => {
+          const blobUrl = URL.createObjectURL(blob);
+          bgmPlayer.replace({ uri: blobUrl });
+          bgmPlayer.volume = BGM_VOLUME;
+          bgmPlayer.loop = true;
+          bgmPlayer.play();
+        })
+        .catch(() => {
+          // 降级：直接从网络播
+          bgmPlayer.play();
+        });
+      return;
+    }
+    // 非 Web 环境直接播
     bgmPlayer.play();
   } catch (e) {
-    // 静默
+    // 静默失败
   }
 }
 
