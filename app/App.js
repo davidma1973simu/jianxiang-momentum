@@ -31,10 +31,17 @@ export default function App() {
       const s = await getAppSettings();
       if (!s.seenOnboard) setOnBoard(true);
       setReady(true);
-      // 等待音景就绪后再启动 BGM，确保播放器已创建
-      startBGM();
+      // BGM 不在这里自动播，等用户首次交互后播（浏览器防自动播放策略）
     })();
   }, []);
+
+  // 首次交互后才启动 BGM（绕过浏览器自动播放禁令）
+  const touchedOnce = useRef(false);
+  function onFirstTouch() {
+    if (touchedOnce.current) return;
+    touchedOnce.current = true;
+    startBGM();
+  }
 
   function transitionTo(next) {
     if (next === screen) return; // 已在当前屏，避免无谓重挂
@@ -47,7 +54,7 @@ export default function App() {
   }
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={styles.safe} onTouchStart={onFirstTouch}>
       <StatusBar style="dark" />
       {!ready ? (
         <View style={styles.fill} />
