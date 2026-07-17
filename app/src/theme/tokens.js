@@ -68,7 +68,7 @@ export const motion = {
   fast: 300,
   base: 500,
   slow: 900,
-  dim: 2500, // 息屏停留时长
+  dim: 3500, // 息屏停留时长（≥3 秒）
 };
 
 // 触控区 ≥ 44pt

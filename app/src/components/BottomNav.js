@@ -7,9 +7,9 @@ import { colors } from '../theme/tokens';
 
 // 四个入口。'home' 由顶部「见象」标志承担，这里放四项核心功能。
 const ITEMS = [
-  { key: 'morning', label: '晨间锚点' },
+  { key: 'morning', label: '当下锚点' },
   { key: 'flight', label: '飞一会儿' },
-  { key: 'evening', label: '晚间复盘' },
+  { key: 'evening', label: '内心感受' },
   { key: 'prairie', label: '我的草原' },
 ];
 

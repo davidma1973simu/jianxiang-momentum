@@ -1,4 +1,4 @@
-// 见象 Momentum · 晚间复盘
+// 见象 Momentum · 内心感受
 // 1 滑块（好难 → 还好）+ 基于今日记录的诗意总结。只存整数，不上传文本。
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, Pressable, Animated, PanResponder, Dimensions } from 'react-native';

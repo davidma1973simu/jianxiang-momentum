@@ -1,4 +1,4 @@
-// 见象 Momentum · 晨间锚点
+// 见象 Momentum · 当下锚点
 // 1 问式入口：我的感受 / 一件小事 / 一个关系。5 秒完成，只存枚举。
 // 点击标签后给一句极短的正能量反馈；每天只留 1 个锚点，杜绝重复。
 import React, { useRef, useState, useEffect } from 'react';
@@ -70,7 +70,7 @@ export default function MorningScreen({ onExit }) {
         ) : !done ? (
           <View style={styles.stageInner}>
             <Text style={styles.step}>
-              今天早上，{'\n'}我想第一眼看哪里？
+            就在当下，{'\n'}第一眼看哪里？
             </Text>
             <View style={styles.chips}>
               {TOPICS.map((t) => (

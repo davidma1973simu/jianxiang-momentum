@@ -156,7 +156,7 @@ function buildMirror(records) {
   if (anyTouched) parts.push('有几次，你把一个需求说出了口——那是心念，变成了语言。');
   if (anyHelp) parts.push('有几次你主动去借力、去问，那不是示弱，是向内求的一部分。');
   if (anyFour) parts.push('你还拆开看过几头大一点的象。');
-  if (dusk.length >= 2) parts.push('晚间复盘里，你越来越能和它共处。');
+  if (dusk.length >= 2) parts.push('对内心的感受里，你越来越能和它共处。');
   parts.push('心量，就是这样一点点被撑大的。');
   return parts.join('\n');
 }

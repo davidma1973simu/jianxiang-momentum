@@ -13,7 +13,7 @@ import FourStepsScreen from './src/screens/FourStepsScreen';
 import HelpFilterScreen from './src/screens/HelpFilterScreen';
 import OnboardScreen from './src/screens/OnboardScreen';
 import BottomNav from './src/components/BottomNav';
-import { initSoundscape } from './src/sound/soundscape';
+import { initSoundscape, startBGM } from './src/sound/soundscape';
 import { colors, font } from './src/theme/tokens';
 import { getSettings as getAppSettings, setSettings } from './src/data/store';
 
@@ -30,6 +30,8 @@ export default function App() {
     getAppSettings().then((s) => {
       if (!s.seenOnboard) setOnBoard(true);
       setReady(true);
+      // 在设置加载完后自动播放极低音量 BGM
+      startBGM();
     });
   }, []);
 
