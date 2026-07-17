@@ -325,9 +325,9 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingTop: '12%',
+    paddingTop: '8%',
     paddingHorizontal: 24,
-    paddingBottom: 24,
+    paddingBottom: 260, // 把深度入口和操作往上抬到大象头上方，避开底部遮挡
   },
   stage4Top: { alignItems: 'center', width: '100%' },
   stage4Bottom: { alignItems: 'center', width: '100%' },

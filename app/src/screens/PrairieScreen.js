@@ -70,12 +70,14 @@ function bodyTight(idx) {
   return BODY_TIGHT[idx] || '身子有点紧';
 }
 
-// 晨间锚点 → 描述性一句话
+// 晨间锚点 → 描述性一句话（显化选择结果）
+const DAWN_LABEL = { 感受: '我的感受', 小事: '一件小事', 关系: '一个关系' };
 function dawnText(tag) {
-  if (tag === '感受') return '今天一早，你先把自己看了一眼。';
-  if (tag === '小事') return '今天一早，你把注意力放在了一件小事上。';
-  if (tag === '关系') return '今天一早，你留意了一个关系。';
-  return '今天一早，你先停了一下。';
+  const label = DAWN_LABEL[tag] || '...';
+  if (tag === '感受') return `今天一早，你选了「${label}」——先把自己看了一眼。`;
+  if (tag === '小事') return `今天一早，你选了「${label}」——把注意力放在了它上面。`;
+  if (tag === '关系') return `今天一早，你选了「${label}」——留意了它。`;
+  return `今天一早，你选了「${label}」。`;
 }
 
 // 大象暂停法 → 描述性叙事（含被触动的活人话）
@@ -95,17 +97,17 @@ function duskText(value) {
   return `夜里你回头看这一天，觉得：${scoreLabel(value)}。`;
 }
 
-// 四步照象 → 描述性叙事（用四步库自带的 AHA 总结）
+// 四步照象 → 描述性叙事（直接用 AHA 结论，不加开场白标题）
 function fourText(rec) {
-  if (!rec || !rec.meta) return '你决定拆开看看这头大象。';
+  if (!rec || !rec.meta) return '你拆开看了看这头大象。';
   const { need, firstStep } = rec.meta;
-  return `这头大一点，你决定拆开看看。${fourSummary({ need, firstStep })}`;
+  return fourSummary({ need, firstStep });
 }
 
-// 求助过滤网 → 描述性叙事
+// 求助过滤网 → 描述性叙事（直接用结论，不加开场白标题）
 function helpText(rec) {
-  if (!rec || !rec.meta) return '想找个人问问，你照了一眼。';
-  return `想找个人问问之前，你照了一眼：${helpConclusion(rec.meta)}`;
+  if (!rec || !rec.meta) return '你照了一眼。';
+  return helpConclusion(rec.meta);
 }
 
 // 取某天脚印：晨间/暂停/晚间/四步照象/求助过滤 各取最新一条
