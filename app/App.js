@@ -26,13 +26,14 @@ export default function App() {
   const fade = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    initSoundscape();
-    getAppSettings().then((s) => {
+    (async () => {
+      await initSoundscape();
+      const s = await getAppSettings();
       if (!s.seenOnboard) setOnBoard(true);
       setReady(true);
-      // 在设置加载完后自动播放极低音量 BGM
+      // 等待音景就绪后再启动 BGM，确保播放器已创建
       startBGM();
-    });
+    })();
   }, []);
 
   function transitionTo(next) {
