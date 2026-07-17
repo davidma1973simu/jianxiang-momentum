@@ -21,6 +21,7 @@ export default function App() {
   const [screen, setScreen] = useState('home'); // 'home' | 'pause' | 'morning' | 'evening' | 'flight' | 'prairie' | 'four' | 'help'
   const [flightOn, setFlightOn] = useState(false); // 飞行上下文：进入暂停法后保持
   const [onBoard, setOnBoard] = useState(false); // 首次引导
+  const [replay, setReplay] = useState(false); // 草原内重看引导（全屏覆盖）
   const [ready, setReady] = useState(false); // 设置是否已加载
   const fade = useRef(new Animated.Value(1)).current;
 
@@ -99,7 +100,12 @@ export default function App() {
                 }}
               />
             )}
-            {screen === 'prairie' && <PrairieScreen onExit={() => transitionTo('home')} />}
+            {screen === 'prairie' && (
+              <PrairieScreen
+                onExit={() => transitionTo('home')}
+                onShowOnboard={() => setReplay(true)}
+              />
+            )}
             {screen === 'four' && (
               <FourStepsScreen
                 onExit={() => transitionTo('home')}
@@ -123,6 +129,13 @@ export default function App() {
 
           {/* 全局底栏：四个入口，严格出现在每一屏 */}
           <BottomNav current={screen} onNavigate={(k) => transitionTo(k)} />
+
+          {/* 重看引导：从「我的草原」呼出，全屏覆盖，看完即隐 */}
+          {replay && (
+            <View style={styles.onboardOverlay}>
+              <OnboardScreen onDone={() => setReplay(false)} />
+            </View>
+          )}
         </>
       )}
     </SafeAreaView>
@@ -144,5 +157,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     ...font.brand,
     opacity: 0.6,
+  },
+  onboardOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 200,
   },
 });

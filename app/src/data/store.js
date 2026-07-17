@@ -41,7 +41,19 @@ export async function addMoment({
     createdAt: Date.now(),
   };
   const list = await getMoments();
-  list.push(record);
+  // 每天只留一个脚印：晨间锚点/大象暂停/晚间复盘各一个，新的覆盖旧的
+  if (phase === Phase.DAWN || phase === Phase.PAUSE || phase === Phase.DUSK) {
+    const now = new Date(record.createdAt);
+    const start = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    const idx = list.findIndex((m) => m.phase === phase && m.createdAt >= start);
+    if (idx >= 0) {
+      list[idx] = { ...record, id: list[idx].id };
+    } else {
+      list.push(record);
+    }
+  } else {
+    list.push(record);
+  }
   await AsyncStorage.setItem(KEY_MOMENTS, JSON.stringify(list));
   return record;
 }
@@ -73,6 +85,21 @@ export async function getTodayMoments() {
   const now = new Date();
   const start = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
   return list.filter((m) => m.createdAt >= start);
+}
+
+// 今日的三个脚印：晨间/暂停/晚间，各取最新一条
+export async function getTodayFootprint() {
+  const today = await getTodayMoments();
+  const latest = (phase) =>
+    today
+      .filter((m) => m.phase === phase)
+      .sort((a, b) => a.createdAt - b.createdAt)
+      .pop() || null;
+  return {
+    dawn: latest(Phase.DAWN),
+    pause: latest(Phase.PAUSE),
+    dusk: latest(Phase.DUSK),
+  };
 }
 
 // 设置（含全局静音开关、飞行模式自动开启 —— 声景铁律：可整体静音）
