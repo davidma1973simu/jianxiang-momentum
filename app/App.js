@@ -1,6 +1,6 @@
 // 见象 Momentum · 应用入口
 // P0 核心：草原（首屏）→ 大象暂停法。极简，无 Tab、无导航栏。
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { View, Text, StyleSheet, Pressable, Animated, SafeAreaView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import HomeScreen from './src/screens/HomeScreen';
@@ -36,12 +36,27 @@ export default function App() {
   }, []);
 
   // 首次交互后才启动 BGM（绕过浏览器自动播放禁令）
+  // 双重保险：RN onTouchStart + 浏览器原生 click/touchstart
   const touchedOnce = useRef(false);
-  function onFirstTouch() {
+  const playOnce = useCallback(() => {
     if (touchedOnce.current) return;
     touchedOnce.current = true;
     startBGM();
-  }
+  }, []);
+  useEffect(() => {
+    // Web 环境：直接挂载到 document，确保任何点击都能触发
+    if (typeof document !== 'undefined') {
+      document.addEventListener('click', playOnce, { once: true });
+      document.addEventListener('touchstart', playOnce, { once: true });
+    }
+    // RN 环境：由 onTouchStart 兜底
+    return () => {
+      if (typeof document !== 'undefined') {
+        document.removeEventListener('click', playOnce);
+        document.removeEventListener('touchstart', playOnce);
+      }
+    };
+  }, [playOnce]);
 
   function transitionTo(next) {
     if (next === screen) return; // 已在当前屏，避免无谓重挂
@@ -54,7 +69,7 @@ export default function App() {
   }
 
   return (
-    <SafeAreaView style={styles.safe} onTouchStart={onFirstTouch}>
+    <SafeAreaView style={styles.safe} onTouchStart={playOnce}>
       <StatusBar style="dark" />
       {!ready ? (
         <View style={styles.fill} />
