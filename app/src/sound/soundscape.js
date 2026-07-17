@@ -42,7 +42,7 @@ export async function initSoundscape() {
     }
     // 加载 BGM 但不自动播放（由 startBGM 触发）
     try {
-      bgmPlayer = createAudioPlayer(require('../../assets/sound/bg-music.wav'));
+      bgmPlayer = createAudioPlayer(require('../../assets/sound/bg-music.mp3'));
       bgmPlayer.volume = BGM_VOLUME;
       bgmPlayer.loop = true;
       bgmLoaded = true;
