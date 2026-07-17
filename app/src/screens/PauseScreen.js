@@ -357,15 +357,15 @@ const styles = StyleSheet.create({
   },
   deepText: {
     fontSize: 13,
-    color: colors.accent,
+    color: '#4A6B3E', // 深绿，提示「向深处走」的入口
     letterSpacing: 0.4,
   },
   deepDot: {
     width: 3,
     height: 3,
     borderRadius: 2,
-    backgroundColor: colors.accent,
-    opacity: 0.5,
+    backgroundColor: '#4A6B3E',
+    opacity: 0.55,
   },
   footer: {
     flexDirection: 'row',

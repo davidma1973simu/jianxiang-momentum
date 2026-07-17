@@ -10,6 +10,7 @@ import Elephant from '../components/Elephant';
 import { colors, font, space } from '../theme/tokens';
 import { getMoments, Phase } from '../data/store';
 import { phraseFor } from '../data/phrases';
+import { fourSummary, helpConclusion } from '../data/deep';
 
 const dayMs = 86400000;
 
@@ -94,7 +95,20 @@ function duskText(value) {
   return `夜里你回头看这一天，觉得：${scoreLabel(value)}。`;
 }
 
-// 取某天三个脚印：晨间/暂停/晚间各一条（最新），恒为 ≤3
+// 四步照象 → 描述性叙事（用四步库自带的 AHA 总结）
+function fourText(rec) {
+  if (!rec || !rec.meta) return '你决定拆开看看这头大象。';
+  const { need, firstStep } = rec.meta;
+  return `这头大一点，你决定拆开看看。${fourSummary({ need, firstStep })}`;
+}
+
+// 求助过滤网 → 描述性叙事
+function helpText(rec) {
+  if (!rec || !rec.meta) return '想找个人问问，你照了一眼。';
+  return `想找个人问问之前，你照了一眼：${helpConclusion(rec.meta)}`;
+}
+
+// 取某天脚印：晨间/暂停/晚间/四步照象/求助过滤 各取最新一条
 function dayFootprints(records) {
   const latest = (phase) =>
     records
@@ -104,15 +118,20 @@ function dayFootprints(records) {
   return {
     dawn: latest(Phase.DAWN),
     pause: latest(Phase.PAUSE),
+    four: latest(Phase.FOUR),
+    help: latest(Phase.HELP),
     dusk: latest(Phase.DUSK),
   };
 }
 
-// 把当天脚印编译成有序的描述性段落
+// 把当天脚印编译成有序的描述性段落（暂停法后的深度工具紧跟其后）
 function describeDay(fp) {
   const out = [];
   if (fp.dawn) out.push({ phase: 'dawn', time: fp.dawn.createdAt, text: dawnText(fp.dawn.tag) });
   if (fp.pause) out.push({ phase: 'pause', time: fp.pause.createdAt, text: pauseText(fp.pause) });
+  // 四步照象 + 求助过滤：作为暂停法的"第二段产出"挂在其后
+  if (fp.four) out.push({ phase: 'four', time: fp.four.createdAt, text: fourText(fp.four) });
+  if (fp.help) out.push({ phase: 'help', time: fp.help.createdAt, text: helpText(fp.help) });
   if (fp.dusk) out.push({ phase: 'dusk', time: fp.dusk.createdAt, text: duskText(fp.dusk.value) });
   return out;
 }
