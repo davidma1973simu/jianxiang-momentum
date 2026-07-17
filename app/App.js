@@ -121,7 +121,7 @@ export default function App() {
               />
             )}
             {screen === 'morning' && <MorningScreen onExit={() => transitionTo('home')} />}
-            {screen === 'evening' && <EveningScreen onExit={() => transitionTo('home')} />}
+            {screen === 'evening' && <EveningScreen onExit={() => transitionTo('prairie')} />}
           </Animated.View>
 
           {/* 全局顶部「见象」= 回首页（草原 + 大象暂停法）。每屏可达 */}

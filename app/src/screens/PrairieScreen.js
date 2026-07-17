@@ -41,18 +41,19 @@ function formatDateLabel(key) {
   return `${d.getMonth() + 1}月${d.getDate()}日`;
 }
 
+// 内心感受得分标签（0-50 平淡 / 50-75 进步 / 75+ 充盈）
 function scoreLabel(value) {
-  if (value >= 72) return '还好';
-  if (value <= 28) return '好难';
-  return '一般';
+  if (value >= 75) return '充盈';
+  if (value >= 50) return '进步';
+  return '平淡';
 }
 
-// 大象配色：随晚间复盘得分变化（轻松偏草绿、紧绷偏紫灰、中等默认蓝灰）
+// 大象配色：随内心感受得分变化（充盈偏暖光、进步默认蓝灰、平淡偏冷雾）
 function eleTint(value) {
   if (value == null) return { color: colors.ele, deep: colors.eleDeep };
-  if (value >= 72) return { color: '#BBD3B8', deep: '#A6C2A3' };
-  if (value <= 28) return { color: '#B9AEC4', deep: '#A99BB6' };
-  return { color: colors.ele, deep: colors.eleDeep };
+  if (value >= 75) return { color: '#C9D9B8', deep: '#B4C8A1' }; // 充盈：暖光绿
+  if (value >= 50) return { color: colors.ele, deep: colors.eleDeep }; // 进步：默认蓝灰
+  return { color: '#B8BFC9', deep: '#A5ADBA' }; // 平淡：冷雾蓝灰
 }
 
 // 需求标签 → 描述性动词

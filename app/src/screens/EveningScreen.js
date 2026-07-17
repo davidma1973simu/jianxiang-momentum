@@ -1,5 +1,5 @@
 // 见象 Momentum · 内心感受
-// 1 滑块（好难 → 还好）+ 基于今日记录的诗意总结。只存整数，不上传文本。
+// 1 滑块（平淡 → 充盈）+ 基于今日记录的活人话总结。只存整数，不上传文本。
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, Pressable, Animated, PanResponder, Dimensions } from 'react-native';
 import Grassland from '../components/Grassland';
@@ -11,21 +11,22 @@ const { width } = Dimensions.get('window');
 const TRACK_PAD = 40;
 const TRACK_W = width - TRACK_PAD * 2;
 
+// 三档：充盈（≥75）/ 进步（50-75）/ 平淡（<50）—— 都是中性正向的活人话
 const SUMMARIES = {
-  easy: [
-    '今天像一片安静的云，不需要赶。',
-    '草原今天很宽，风也轻。',
-    '你把自己安放得不错。',
+  full: [
+    '今天像一片云，撑得满满，又轻轻的。',
+    '草原今天很宽，你撑住了自己，也接住了它。',
+    '今天是你挺舒展的样子——不装，也不撑。',
   ],
-  mid: [
-    '今天有几块石头，但你都绕过去了。',
-    '大象来过，也走过了。',
-    '不算轻松，也不算太难，这就够了。',
+  progress: [
+    '今天有过不太平的，但都走过来了。',
+    '不算轻松，但一直在走。这就够了。',
+    '大象来过，也走过了——你没有被它困住。',
   ],
-  hard: [
-    '今天确实不轻，能坐下来复盘已经是勇气。',
-    '草原会暗一阵，但天不会一直黑。',
-    '大象还在，但你已经学会和它共处一晚。',
+  plain: [
+    '今天比较平，没什么大事。',
+    '平淡的日子也是好日子——不用非得起浪。',
+    '安安静静一天，也是一种养。',
   ],
 };
 
@@ -33,18 +34,18 @@ function eveningSummary(value, today) {
   const paused = today.filter((m) => m.phase === Phase.PAUSE).length;
   const touched = today.some((m) => m.phase === Phase.PAUSE && m.phraseTouched);
   const dawn = today.find((m) => m.phase === Phase.DAWN);
-  let bucket = 'mid';
-  if (value >= 72) bucket = 'easy';
-  else if (value <= 28) bucket = 'hard';
+  let bucket = 'progress';
+  if (value >= 75) bucket = 'full';
+  else if (value < 50) bucket = 'plain';
 
   const base = SUMMARIES[bucket][(today.length + value) % SUMMARIES[bucket].length];
   let tail = '';
   if (paused > 0) {
     tail = touched
-      ? ' 今天你有停下来，也听见了自己一句话。'
+      ? ' 今天你停下来了，也听见了自己一句话。'
       : ' 今天你停下来了，这就很好。';
   } else if (dawn) {
-    tail = ' 早上你选了一个起点，今天已经算认真过了。';
+    tail = ' 今天你选了一个起点，这就够了。';
   }
   return base + tail;
 }
@@ -105,8 +106,8 @@ export default function EveningScreen({ onExit }) {
 
             <View style={styles.sliderBox}>
               <View style={styles.labels}>
-                <Text style={styles.labelText}>好难</Text>
-                <Text style={styles.labelText}>还好</Text>
+                <Text style={styles.labelText}>平淡</Text>
+                <Text style={styles.labelText}>充盈</Text>
               </View>
               <View
                 style={styles.track}

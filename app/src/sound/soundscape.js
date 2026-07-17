@@ -13,7 +13,7 @@ const SOURCES = {
   touch: require('../../assets/sound/touch-ripple.wav'),
 };
 
-const BGM_VOLUME = 0.12; // BGM 极低，绝对不喧宾夺主
+const BGM_VOLUME = 0.25; // BGM 低音量，不喧宾夺主
 
 // 默认音量极低 —— 视觉才是主通道，声音只是草原的回声
 const VOLUME = {
