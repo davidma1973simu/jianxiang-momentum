@@ -206,50 +206,52 @@ export default function PauseScreen({ onExit, onEnterPrairie, onEnterFour, onEnt
       {stage === 4 && (
         <Pressable style={StyleSheet.absoluteFill} onPress={onEnterPrairie}>
           <Animated.View style={[styles.stage4, { opacity: contentOp }]}>
-            <View style={styles.phraseCard}>
-              {touched === 0 ? (
-                <>
-                  <Text style={styles.phrase}>{phraseFor(needTag, phraseIdx)}</Text>
-                  <Pressable onPress={onTouch} hitSlop={10}>
-                    <Text style={styles.touch}>这句话，有碰到你吗？</Text>
-                  </Pressable>
-                </>
-              ) : (
-                <Text style={styles.phrase}>{TOUCH_ECHO[Math.min(touched - 1, TOUCH_ECHO.length - 1)]}</Text>
+            {/* 顶部：短语 + 触动 + 收尾反馈 */}
+            <View style={styles.stage4Top}>
+              <View style={styles.phraseCard}>
+                {touched === 0 ? (
+                  <>
+                    <Text style={styles.phrase}>{phraseFor(needTag, phraseIdx)}</Text>
+                    <Pressable onPress={onTouch} hitSlop={10}>
+                      <Text style={styles.touch}>这句话，有碰到你吗？</Text>
+                    </Pressable>
+                  </>
+                ) : (
+                  <Text style={styles.phrase}>{TOUCH_ECHO[Math.min(touched - 1, TOUCH_ECHO.length - 1)]}</Text>
+                )}
+              </View>
+              {touched === 0 && (
+                <Pressable onPress={nextPhrase} hitSlop={10}>
+                  <Text style={styles.alt}>不对味？再换一句</Text>
+                </Pressable>
               )}
-            </View>
-            {touched === 0 && (
-              <Pressable onPress={nextPhrase} hitSlop={10}>
-                <Text style={styles.alt}>不对味？再换一句</Text>
-              </Pressable>
-            )}
 
-            {/* 收尾反馈：点明刚走完的一轮向内求（心念→语言→行动） */}
-            <Text style={styles.reflection}>
-              你刚走完一轮向内求：{'\n'}心里觉察了 → 把需求说出了口 → 没绕开。
-            </Text>
-
-            <View style={styles.spacer} />
-
-            {/* 深度工具入口：主动拉杠杆才出现 */}
-            <View style={styles.deepEntries}>
-              <Pressable onPress={onEnterFour} hitSlop={10}>
-                <Text style={styles.deepText}>这头有点大，拆一拆？</Text>
-              </Pressable>
-              <View style={styles.deepDot} />
-              <Pressable onPress={onEnterHelp} hitSlop={10}>
-                <Text style={styles.deepText}>想向外抓，先照一眼</Text>
-              </Pressable>
+              {/* 收尾反馈：点明刚走完的一轮向内求（心念→语言→行动） */}
+              <Text style={styles.reflection}>
+                你刚走完一轮向内求：{'\n'}心里觉察了 → 把需求说出了口 → 没绕开。
+              </Text>
             </View>
 
-            {/* 再来一次 / 回草原 */}
-            <View style={styles.footer}>
-              <Pressable onPress={replay} hitSlop={10}>
-                <Text style={styles.footerText}>↺ 再来一次</Text>
-              </Pressable>
-              <Pressable onPress={onEnterPrairie} hitSlop={10}>
-                <Text style={styles.footerText}>回到草原</Text>
-              </Pressable>
+            {/* 底部：深度工具入口（主动拉杠杆才出现）+ 操作 */}
+            <View style={styles.stage4Bottom}>
+              <View style={styles.deepEntries}>
+                <Pressable onPress={onEnterFour} hitSlop={10}>
+                  <Text style={styles.deepText}>这头有点大，拆一拆？</Text>
+                </Pressable>
+                <View style={styles.deepDot} />
+                <Pressable onPress={onEnterHelp} hitSlop={10}>
+                  <Text style={styles.deepText}>想向外抓，先照一眼</Text>
+                </Pressable>
+              </View>
+
+              <View style={styles.footer}>
+                <Pressable onPress={replay} hitSlop={10}>
+                  <Text style={styles.footerText}>↺ 再来一次</Text>
+                </Pressable>
+                <Pressable onPress={onEnterPrairie} hitSlop={10}>
+                  <Text style={styles.footerText}>回到草原</Text>
+                </Pressable>
+              </View>
             </View>
           </Animated.View>
         </Pressable>
@@ -321,12 +323,14 @@ const styles = StyleSheet.create({
   stopSub: { marginTop: 20, fontSize: 16, color: colors.dimText, letterSpacing: 1 },
   stage4: {
     ...StyleSheet.absoluteFillObject,
-    flex: 1,
     alignItems: 'center',
+    justifyContent: 'space-between',
     paddingTop: '12%',
     paddingHorizontal: 24,
     paddingBottom: 24,
   },
+  stage4Top: { alignItems: 'center', width: '100%' },
+  stage4Bottom: { alignItems: 'center', width: '100%' },
   phraseCard: {
     backgroundColor: colors.card,
     borderRadius: 24,
@@ -344,13 +348,12 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     opacity: 0.92,
   },
-  spacer: { flex: 1 },
   deepEntries: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     gap: 16,
-    marginBottom: 14,
+    marginBottom: 18,
   },
   deepText: {
     fontSize: 13,
@@ -368,7 +371,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     gap: 40,
-    marginBottom: 6,
+    paddingBottom: 24, // 让「再来一次/回到草原」不和全局底栏贴在一起
   },
   footerText: { fontSize: 13, color: colors.inkSoft, letterSpacing: 0.7 },
   brand: {
