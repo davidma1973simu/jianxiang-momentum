@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>见象 Momentum · 交互原型</title>
+<style>
+  :root{
+    --bg:#F5F0EB;--bg-deep:#EDE7DD;--sky:#EFEADD;
+    --hill-far:#D9D8C2;--hill-near:#CDD6B4;--grass:#C2D2A0;--grass-deep:#AFC78A;
+    --ele:#A9BED2;--ele-deep:#9AB0C6;--ele-shadow:#8AA0B6;
+    --ink:#6B6358;--ink-soft:#928B7E;--blush:#E7C3B4;--accent:#D9B08C;--cloud:#F3EFE6;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;background:radial-gradient(120% 120% at 50% 0%,#FBF8F3 0%,#ECE6DB 100%);display:flex;align-items:center;justify-content:center;min-height:100vh;color:var(--ink);}
+  .phone{position:relative;width:392px;height:760px;border-radius:46px;background:var(--bg);overflow:hidden;box-shadow:0 30px 80px -30px rgba(90,82,70,.45),0 0 0 1px rgba(120,110,95,.06) inset;}
+  .brand{position:absolute;top:26px;left:0;right:0;text-align:center;font-size:15px;letter-spacing:.5em;color:var(--ink-soft);opacity:.55;z-index:30;font-weight:500;padding-left:.5em;}
+  .screen{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .9s ease;display:flex;flex-direction:column;align-items:center;}
+  .screen.active{opacity:1;pointer-events:auto;}
+  .scene{position:absolute;inset:0;z-index:1;}
+  .scene .sky{position:absolute;inset:0;background:linear-gradient(180deg,var(--sky) 0%,var(--sky) 40%,var(--hill-far) 40%,var(--hill-near) 62%,var(--grass) 62%,var(--grass-deep) 100%);}
+  .scene svg{position:absolute;inset:0;width:100%;height:100%;}
+  #home .lead{position:absolute;top:100px;left:0;right:0;text-align:center;z-index:10;padding:0 38px;font-size:18px;line-height:2;color:var(--ink);font-weight:400;}
+  #home .lead b{font-weight:500;}
+  #home .tap{position:absolute;bottom:360px;left:0;right:0;text-align:center;z-index:10;font-size:14px;color:var(--ink-soft);opacity:.7;letter-spacing:.05em;animation:breathe 3.4s ease-in-out infinite;}
+  @keyframes breathe{0%,100%{opacity:.45;}50%{opacity:.85;}}
+  #pause .stage{position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .step-text{position:absolute;top:150px;left:0;right:0;text-align:center;padding:0 44px;font-size:16px;line-height:1.9;color:var(--ink);opacity:0;transform:translateY(8px);transition:opacity .8s ease,transform .8s ease;pointer-events:none;}
+  .step-text.show{opacity:1;transform:none;pointer-events:auto;}
+  .chips{position:absolute;left:0;right:0;display:flex;flex-wrap:wrap;gap:14px;justify-content:center;padding:0 40px;opacity:0;transition:opacity .8s ease;pointer-events:none;}
+  #chips-body{top:320px;}
+  #chips-need{top:380px;}
+  .chips.show{opacity:1;pointer-events:auto;}
+  .chip{font-size:15px;color:var(--ink);background:rgba(255,255,255,.5);padding:10px 18px;border-radius:22px;backdrop-filter:blur(4px);box-shadow:0 6px 18px -10px rgba(90,82,70,.4);cursor:pointer;user-select:none;}
+  .chip.lit{background:var(--accent);color:#fff;box-shadow:0 8px 22px -8px rgba(217,176,140,.8);}
+  .phrase{position:absolute;top:370px;left:24px;right:24px;z-index:12;background:rgba(255,255,255,.62);border-radius:24px;padding:22px 22px 18px;backdrop-filter:blur(8px);box-shadow:0 16px 40px -22px rgba(90,82,70,.5);font-size:16px;line-height:1.85;color:var(--ink);opacity:0;transform:translateY(12px) scale(.98);transition:opacity 1s ease,transform 1s ease;pointer-events:none;}
+  .phrase.show{opacity:1;transform:none;pointer-events:auto;}
+  .phrase .touch{display:block;margin-top:14px;font-size:13px;color:var(--ink-soft);text-align:right;letter-spacing:.04em;cursor:pointer;}
+  .dim{position:absolute;inset:0;z-index:20;background:rgba(40,38,34,.0);pointer-events:none;transition:background .9s ease;display:flex;align-items:center;justify-content:center;}
+  .dim.on{background:rgba(40,38,34,.82);}
+  .dim .stop-word{font-size:64px;color:#F5F0EB;opacity:0;letter-spacing:.3em;padding-left:.3em;transition:opacity 1s ease;}
+  .dim.on .stop-word{opacity:.92;}
+  .dim .stop-sub{margin-top:20px;font-size:16px;color:#F5F0EB;opacity:0;letter-spacing:.06em;transition:opacity 1.2s ease .8s;}
+  .dim.on .stop-sub{opacity:.82;}
+  .st1-hint{display:inline-block;margin-top:14px;font-size:15px;color:var(--ink-soft);opacity:.8;}
+  #prairie .title{position:absolute;top:96px;left:0;right:0;text-align:center;font-size:17px;color:var(--ink-soft);letter-spacing:.3em;z-index:10;}
+  #prairie .summary{position:absolute;top:140px;left:34px;right:34px;text-align:center;z-index:10;font-size:16px;line-height:1.95;color:var(--ink);opacity:0;transform:translateY(8px);transition:opacity 1s ease,transform 1s ease;}
+  #prairie .summary.show{opacity:1;transform:none;}
+  #prairie .summary .soft{color:var(--ink-soft);font-size:13px;display:block;margin-top:8px;}
+  #prairie .footprints{position:absolute;top:208px;left:0;right:0;bottom:110px;overflow:auto;z-index:10;padding:0 30px;display:flex;flex-direction:column;gap:12px;align-items:center;}
+  .fp-card{width:100%;max-width:300px;background:rgba(255,255,255,.55);border-radius:18px;padding:15px 18px;backdrop-filter:blur(6px);box-shadow:0 10px 24px -16px rgba(90,82,70,.35);text-align:left;opacity:0;transform:translateY(10px);transition:opacity .7s ease,transform .7s ease;}
+  .fp-card.show{opacity:1;transform:none;}
+  .fp-card .fp-when{font-size:12px;color:var(--ink-soft);letter-spacing:.04em;margin-bottom:5px;}
+  .fp-card .fp-body{font-size:15px;color:var(--ink);line-height:1.6;}
+  .fp-card .fp-tag{display:inline-block;margin-top:8px;font-size:13px;color:var(--accent);background:rgba(217,176,140,.12);padding:4px 10px;border-radius:12px;}
+  .fp-card .fp-touch{float:right;font-size:13px;margin-top:6px;}
+  .fp-empty{font-size:15px;color:var(--ink-soft);text-align:center;line-height:1.8;opacity:0;transform:translateY(10px);transition:opacity .7s ease .3s;max-width:280px;}
+  .fp-empty.show{opacity:.85;transform:none;}
+  .fp-card{cursor:pointer;}
+  .fp-phrase{display:none;margin-top:12px;padding-top:10px;border-top:1px solid rgba(107,99,88,.08);font-size:14px;line-height:1.7;color:var(--ink);}
+  .fp-card.open .fp-phrase{display:block;}
+  .date-group{margin-bottom:20px;}
+  .date-title{font-size:14px;color:var(--ink-soft);letter-spacing:.05em;margin-bottom:10px;padding-left:4px;}
+  .fp-hint{position:absolute;bottom:84px;left:0;right:0;text-align:center;font-size:13px;color:var(--ink-soft);opacity:0;transition:opacity .6s ease;}
+  .dots{position:absolute;bottom:40px;left:0;right:0;display:flex;gap:10px;justify-content:center;z-index:40;}
+  .dot{width:7px;height:7px;border-radius:50%;background:rgba(107,99,88,.28);transition:all .4s ease;cursor:pointer;}
+  .dot.on{background:var(--ink);transform:scale(1.25);}
+  .replay{position:absolute;bottom:118px;left:0;right:0;text-align:center;z-index:12;font-size:13px;color:var(--ink-soft);opacity:0;transition:opacity .8s ease;cursor:pointer;letter-spacing:.05em;pointer-events:none;}
+  .replay.show{opacity:.75;pointer-events:auto;}
+  .idle{position:absolute;inset:0;z-index:11;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 44px;opacity:0;pointer-events:none;transition:opacity .6s ease;}
+  .idle.show{opacity:1;pointer-events:auto;}
+  .idle p{font-size:17px;line-height:1.9;color:var(--ink);text-align:center;margin-bottom:32px;}
+  .idle .btn{font-size:15px;color:#fff;background:var(--accent);padding:12px 32px;border-radius:24px;cursor:pointer;box-shadow:0 8px 22px -8px rgba(217,176,140,.8);}
+  .idle .hint{margin-top:24px;font-size:13px;color:var(--ink-soft);opacity:.8;}
+  .fine-msg{position:absolute;bottom:270px;left:0;right:0;text-align:center;z-index:15;font-size:15px;color:var(--ink-soft);opacity:0;transform:translateY(12px);transition:opacity .6s ease,transform .6s ease;letter-spacing:.04em;}
+  .fine-msg.show{opacity:.85;transform:none;}
+  .alt-phrase{position:absolute;bottom:160px;left:0;right:0;text-align:center;z-index:15;font-size:14px;color:var(--ink-soft);opacity:0;transition:opacity .6s ease;cursor:pointer;user-select:none;}
+  .alt-phrase.show{opacity:.7;}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="brand">见 象</div>
+
+  <!-- ====== 大象 SVG 定义（隐藏，仅供 <use> 引用） ====== -->
+  <svg style="position:absolute;width:1px;height:1px;overflow:hidden;left:-9999px">
+    <defs>
+      <g id="ele-calm">
+        <ellipse cx="132" cy="156" rx="82" ry="18" fill="#8AA0B6" opacity=".15"/>
+        <ellipse cx="78" cy="150" rx="16" ry="22" fill="#9AB0C6"/>
+        <ellipse cx="112" cy="154" rx="16" ry="22" fill="#9AB0C6"/>
+        <ellipse cx="132" cy="104" rx="80" ry="58" fill="#A9BED2"/>
+        <ellipse cx="156" cy="152" rx="16" ry="22" fill="#9AB0C6"/>
+        <ellipse cx="184" cy="148" rx="15" ry="20" fill="#9AB0C6"/>
+        <circle cx="68" cy="92" r="48" fill="#A9BED2"/>
+        <ellipse cx="36" cy="74" rx="34" ry="42" transform="rotate(-14 36 74)" fill="#9AB0C6"/>
+        <path d="M206 96 C220 106 220 134 208 144" fill="none" stroke="#9AB0C6" stroke-width="12" stroke-linecap="round"/>
+        <path d="M70 120 C44 132 38 158 56 168 C66 174 78 164 70 154" fill="none" stroke="#9AB0C6" stroke-width="16" stroke-linecap="round"/>
+        <path d="M48 84 q8 4 16 0" stroke="#5B554E" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+        <path d="M82 86 q8 4 16 0" stroke="#5B554E" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+        <ellipse cx="100" cy="100" rx="8" ry="5" fill="#E7C3B4" opacity=".75"/>
+      </g>
+      <g id="ele-heavy">
+        <ellipse cx="134" cy="160" rx="84" ry="18" fill="#8AA0B6" opacity=".15"/>
+        <ellipse cx="78" cy="156" rx="17" ry="24" fill="#9AB0C6"/>
+        <ellipse cx="116" cy="160" rx="17" ry="24" fill="#9AB0C6"/>
+        <ellipse cx="134" cy="112" rx="82" ry="62" fill="#A9BED2"/>
+        <ellipse cx="160" cy="158" rx="17" ry="24" fill="#9AB0C6"/>
+        <ellipse cx="188" cy="154" rx="16" ry="22" fill="#9AB0C6"/>
+        <circle cx="68" cy="98" r="50" fill="#A9BED2"/>
+        <ellipse cx="34" cy="80" rx="36" ry="44" transform="rotate(-16 34 80)" fill="#9AB0C6"/>
+        <path d="M208 100 C224 110 224 142 210 152" fill="none" stroke="#9AB0C6" stroke-width="13" stroke-linecap="round"/>
+        <path d="M70 126 C42 138 38 166 58 176 C70 182 82 170 74 160" fill="none" stroke="#9AB0C6" stroke-width="17" stroke-linecap="round"/>
+        <path d="M48 90 q8 2 16 -2" stroke="#5B554E" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+        <path d="M84 92 q8 2 16 -2" stroke="#5B554E" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+        <ellipse cx="104" cy="108" rx="8" ry="5" fill="#E7C3B4" opacity=".55"/>
+      </g>
+    </defs>
+  </svg>
+
+  <!-- ============ 首屏 · 草原 ============ -->
+  <div class="screen active" id="home">
+    <div class="scene">
+      <div class="sky"></div>
+      <svg viewBox="0 0 392 760" preserveAspectRatio="xMidYMid slice">
+        <path d="M0 300 Q90 250 180 295 T392 285 L392 360 L0 360 Z" fill="#D9D8C2" opacity=".7"/>
+        <path d="M0 430 Q120 380 220 425 T392 410 L392 520 L0 520 Z" fill="#CDD6B4"/>
+        <path d="M0 470 Q140 440 260 478 T392 470 L392 760 L0 760 Z" fill="#C2D2A0"/>
+        <path d="M0 560 Q160 525 300 565 T392 555 L392 760 L0 760 Z" fill="#AFC78A"/>
+        <g transform="translate(250 388) scale(.3)" opacity=".8"><use href="#ele-calm"/></g>
+        <g transform="translate(300 398) scale(.24)" opacity=".68"><use href="#ele-calm"/></g>
+        <g transform="translate(336 393) scale(.28)" opacity=".74"><use href="#ele-calm"/></g>
+        <g transform="translate(90 440) scale(.9)" class="home-ele"><use href="#ele-calm"/></g>
+        <g stroke="#9DB879" stroke-width="2.4" stroke-linecap="round" opacity=".8" fill="none">
+          <path d="M70 720 q4 -16 0 -28 M76 722 q10 -12 14 -24 M64 722 q-8 -10 -10 -22"/>
+          <path d="M320 710 q4 -16 0 -28 M326 712 q10 -12 14 -24 M314 712 q-8 -10 -10 -22"/>
+        </g>
+        <g fill="#F3EFE6" opacity=".25">
+          <ellipse cx="300" cy="170" rx="46" ry="20"/>
+          <ellipse cx="330" cy="160" rx="34" ry="16"/>
+        </g>
+      </svg>
+    </div>
+    <div class="lead hot" onclick="goPause()">
+      每个人眼前，<br>都有一片草原。<br><b>偶尔，会冒出一头大象。</b>
+    </div>
+    <div class="tap hot" onclick="goPause()">心里有点堵？碰碰它看看</div>
+  </div>
+
+  <!-- ============ 大象暂停法 ============ -->
+  <div class="screen" id="pause">
+    <div class="scene">
+      <div class="sky"></div>
+      <svg viewBox="0 0 392 760" preserveAspectRatio="xMidYMid slice">
+        <path d="M0 300 Q90 250 180 295 T392 285 L392 360 L0 360 Z" fill="#D9D8C2" opacity=".7"/>
+        <path d="M0 430 Q120 380 220 425 T392 410 L392 520 L0 520 Z" fill="#CDD6B4"/>
+        <path d="M0 470 Q140 440 260 478 T392 470 L392 760 L0 760 Z" fill="#C2D2A0"/>
+        <path d="M0 560 Q160 525 300 565 T392 555 L392 760 L0 760 Z" fill="#AFC78A"/>
+        <g transform="translate(90 380) scale(1.0)" id="pause-ele"><use href="#ele-heavy"/></g>
+        <g transform="translate(280 540) scale(.42)"><use href="#ele-calm"/></g>
+        <g transform="translate(120 182) scale(.6)"><use href="#deco-bird"/></g>
+      </svg>
+    </div>
+    <div class="dim" id="dim"><div class="stop-word">停</div><div class="stop-sub">在心里说一句：大象来了</div></div>
+    <div class="stage">
+      <div class="step-text" id="st1">先停一下。<br>不用解决什么，就停三秒。<br><span class="st1-hint">在心里说一句：大象来了</span></div>
+      <div class="step-text" id="st2">身体哪里有点紧？<br>不用想太多，点到就行。</div>
+      <div class="step-text" id="st3">你这会儿，其实在求什么？<br>选一个最接近的。</div>
+      <div class="chips" id="chips-body">
+        <span class="chip" data-label="肩膀">肩膀</span>
+        <span class="chip" data-label="胸口">胸口</span>
+        <span class="chip" data-label="额头">额头</span>
+        <span class="chip" data-label="说不上来">说不上来</span>
+      </div>
+      <div class="chips" id="chips-need">
+        <span class="chip" data-label="想被认可">想被认可</span>
+        <span class="chip" data-label="需要安心">需要安心</span>
+        <span class="chip" data-label="想要掌控">想要掌控</span>
+        <span class="chip" data-label="想要陪伴">想要陪伴</span>
+      </div>
+      <div class="phrase" id="phrase"></div>
+    </div>
+    <div class="idle" id="pauseIdle">
+      <p>刚才的停、看、问，已经留在了草原上。</p>
+      <div class="btn" onclick="rp()">再来一次</div>
+      <div class="hint">或点底部第三个圆点，去看看留下的脚印</div>
+    </div>
+    <div class="replay" id="replay">↺ 再来一次</div>
+  </div>
+
+  <!-- ============ 我的草原 ============ -->
+  <div class="screen" id="prairie">
+    <div class="scene">
+      <div class="sky"></div>
+      <svg viewBox="0 0 392 760" preserveAspectRatio="xMidYMid slice">
+        <path d="M0 300 Q90 250 180 295 T392 285 L392 360 L0 360 Z" fill="#D9D8C2" opacity=".7"/>
+        <path d="M0 430 Q120 380 220 425 T392 410 L392 520 L0 520 Z" fill="#CDD6B4"/>
+        <path d="M0 470 Q140 440 260 478 T392 470 L392 760 L0 760 Z" fill="#C2D2A0"/>
+        <path d="M0 560 Q160 525 300 565 T392 555 L392 760 L0 760 Z" fill="#AFC78A"/>
+        <g transform="translate(146 460) scale(1.05)"><use href="#ele-heavy"/></g>
+        <g transform="translate(58 560) scale(.50)"><use href="#ele-calm"/></g>
+        <g transform="translate(290 540) scale(.42)"><use href="#ele-calm"/></g>
+        <g transform="translate(224 640) scale(.36)"><use href="#ele-calm"/></g>
+        <g transform="translate(42 500) scale(.28)"><use href="#ele-calm"/></g>
+        <g transform="translate(340 600) scale(.30)"><use href="#ele-calm"/></g>
+        <g transform="translate(118 624) scale(.24)"><use href="#ele-calm"/></g>
+      </svg>
+    </div>
+    <div class="title">你 的 草 原</div>
+    <div class="summary" id="pSummary">
+      <span id="pSummaryMain">这周，你最常面对的，是<b>「想被认可」</b>。</span>
+      <span class="soft">不是负面情绪曲线，只是需求出现的密度。<br>每一次停下，都会留下一个脚印。</span>
+    </div>
+    <div class="footprints" id="pFootprints"></div>
+    <div class="fp-hint" id="pHint">这些脚印只留在你的手机里，我们不会看到</div>
+  </div>
+
+  <!-- 底部三点 -->
+  <div class="dots">
+    <div class="dot on" data-i="0" onclick="go(0)"></div>
+    <div class="dot" data-i="1" onclick="go(1)"></div>
+    <div class="dot" data-i="2" onclick="go(2)"></div>
+  </div>
+
+</div>
+
+<!-- ====== 装饰 symbol 定义 ====== -->
+<svg style="position:absolute;width:1px;height:1px;overflow:hidden;left:-9999px">
+  <defs>
+    <g id="deco-bird"><path d="M2 9 Q7 2 12 8 Q17 2 22 9" stroke="#A89C8C" stroke-width="1.8" fill="none" stroke-linecap="round"/></g>
+  </defs>
+</svg>
+
+<script>
+// ====== 语言转换库 ======
+const P={'被认可':['换谁都想被看见，这不丢人。先把手头一个小环节做完——不是为了交差，是为了让自己先承认："我做到了。"','方案被打回的时候心里堵，太正常了。那不是你不行，是这事儿还需要再走一步。先喝口水，再看一眼需求。','被人误解的感觉很难受。不急着解释，先深呼吸一次——你不需要在情绪上头时证明自己。','被看见不是要你闪闪发光，只是有人注意到"你在"。先对自己说一句："我看见了。"'],'安全感':['活儿突然砸下来，心里发慌太正常了。要是这会儿乱，不妨先挑一件最小的动动手——不为赶紧交差，就为把那点主动权悄悄拿回自己手里。','对未来焦虑谁都经历过。不怕是假的，但你可以选一件今天能做的事，哪怕只是搜个资料——动着动着，路就出来了。','钱不够花的时候，谁都会慌。不急着否定自己，先看看这个月哪笔是可以少花一点的。一小步也是方向。','身体不舒服的时候，最容易被不安淹没。先停下手里的事，给自己泡杯热的——身体需要被照顾，不是被担心。'],'掌控感':['计划被打乱，谁都烦。可失控感里最折磨人的，是"只能等着"。不妨先做一件你能决定的——哪怕很小，也是你说了算。','催婚催生这些话，谁听多了都炸。那是他们的担心，不是你的人生进度条。你不需要按谁的表格活。','孩子不听你的，是因为他想被当作一个独立的人。忍三秒别开口，让他先说——不是认输，是给他被听见的尊严。','伴侣管东管西，本质上是在求安心。不用硬杠，给他一个确定的信号："我知道你在乎。" 就这一句，可能比吵一百句有用。'],'链接感':['消息发出去没人回，谁都容易往坏处想。先放下手机，做点别的——他可能只是还没看到，不是你不够重要。','被冷落的感觉很真实，也很正常。你需要链接感，但不一定非要从另一个人身上拿。给一个老朋友发条消息，哪怕是表情包。','聚会没叫你，心里空落落的，太正常了。可这不等于你被排除在外。今晚做一件让自己开心的小事，自己陪自己也是链接。','周末一个人待着，无聊又无力。谁都会有这样的时刻。不急着填满它，去公园走走、买束花——你是自己最好的陪伴。']};
+
+// ====== 需求标签映射 ======
+const needMap={'想被认可':'被认可','需要安心':'安全感','想要掌控':'掌控感','想要陪伴':'链接感'};
+
+// ====== 记录（只存枚举，绝不存文本） ======
+let records=[];
+function loadRecords(){try{records=JSON.parse(localStorage.getItem('jx_records'))||[];}catch(e){records=[];}}
+function saveRecords(){try{localStorage.setItem('jx_records',JSON.stringify(records));}catch(e){}}
+function addRecord(r){records.unshift(r);saveRecords();}
+function today(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+function formatTime(ts){const d=new Date(ts);const h=String(d.getHours()).padStart(2,'0');const m=String(d.getMinutes()).padStart(2,'0');return `${h}:${m}`;}
+function dateLabel(key){
+  const t=today();
+  const yd=new Date();yd.setDate(yd.getDate()-1);
+  const y=`${yd.getFullYear()}-${String(yd.getMonth()+1).padStart(2,'0')}-${String(yd.getDate()).padStart(2,'0')}`;
+  if(key===t)return '今天';
+  if(key===y)return '昨天';
+  const p=key.split('-');return parseInt(p[1])+'月'+parseInt(p[2])+'日';
+}
+loadRecords();
+
+// ====== 屏幕管理 ======
+const sc=[document.getElementById('home'),document.getElementById('pause'),document.getElementById('prairie')];
+const dt=document.querySelectorAll('.dot');let pt=null;
+
+function go(i){
+  clearTimeout(pt);
+  sc.forEach((s,k)=>s.classList.toggle('active',k===i));
+  dt.forEach((d,k)=>d.classList.toggle('on',k===i));
+  if(i!==1){/* 离开 pause 屏时不清空，但切到 prairie 要刷新；切到 home 也保留 pause 状态 */}
+  if(i===2){renderPrairie();}
+  if(i===1){/* 若 pause 已结束，显示开始态 */ showPauseIdle();}
+}
+
+function showPauseIdle(){
+  if(ps>0)return; // 仍在流程中
+  document.getElementById('st1').classList.remove('show');
+  document.getElementById('st2').classList.remove('show');
+  document.getElementById('st3').classList.remove('show');
+  document.getElementById('chips-body').classList.remove('show');
+  document.getElementById('chips-need').classList.remove('show');
+  document.getElementById('phrase').classList.remove('show');
+  document.getElementById('replay').classList.remove('show');
+  document.getElementById('alt-phrase')?.remove();
+  const idle=document.getElementById('pauseIdle');
+  if(idle)idle.classList.add('show');
+}
+
+function hidePauseIdle(){
+  const idle=document.getElementById('pauseIdle');
+  if(idle)idle.classList.remove('show');
+}
+
+function renderPrairie(){
+  const sumMain=document.getElementById('pSummaryMain');
+  const fp=document.getElementById('pFootprints');
+  const hint=document.getElementById('pHint');
+  fp.innerHTML='';
+  const sum=document.getElementById('pSummary');
+  sum.classList.remove('show');
+  if(!records.length){
+    sumMain.innerHTML='这片草原还很安静。';
+    const empty=document.createElement('div');empty.className='fp-empty';empty.innerHTML='每次你停下来、看见自己、听见一句话，<br>这里都会留下一个小小的脚印。<br><br>不急，随时可以从第二屏开始一次。';
+    fp.appendChild(empty);
+    setTimeout(()=>empty.classList.add('show'),100);
+  }else{
+    const tagCounts={};
+    records.forEach(r=>{const t=r.need||'安全感';tagCounts[t]=(tagCounts[t]||0)+1;});
+    const top=Object.entries(tagCounts).sort((a,b)=>b[1]-a[1])[0][0];
+    const totalToday=records.filter(r=>r.date===today()).length;
+    sumMain.innerHTML=`这片草原上，共有 <b>${records.length}</b> 个脚印。${totalToday>0?'<br>今天留下了 '+totalToday+' 个。':''}<br>最常出现的是<b>「${top}」</b>。`;
+    const groups={};
+    records.forEach(r=>{if(!groups[r.date])groups[r.date]=[];groups[r.date].push(r);});
+    const keys=Object.keys(groups).sort((a,b)=>b.localeCompare(a));
+    keys.forEach((date,gi)=>{
+      const g=document.createElement('div');g.className='date-group';
+      const title=document.createElement('div');title.className='date-title';title.textContent=dateLabel(date);
+      g.appendChild(title);
+      groups[date].slice().reverse().forEach((r,idx)=>{
+        const card=document.createElement('div');card.className='fp-card';
+        const phrase=P[r.need]?P[r.need][r.phraseIndex||0]:'';
+        card.innerHTML=`<div class="fp-when">${formatTime(r.ts)}</div><div class="fp-body">${r.body==='说不上来'?'身体：说不上来':'身体：'+r.body}</div><span class="fp-tag">${r.need}</span>${r.touched?'<span class="fp-touch">🫶 被碰到了</span>':''}<div class="fp-phrase">${phrase}</div>`;
+        card.onclick=function(){card.classList.toggle('open');};
+        g.appendChild(card);
+        setTimeout(()=>card.classList.add('show'),80+idx*120);
+      });
+      fp.appendChild(g);
+    });
+  }
+  setTimeout(()=>hint.classList.add('show'),500);
+  sum.classList.add('show');
+}
+
+// ====== 首屏 ======
+document.querySelector('.home-ele')?.addEventListener('click',gp);let ft=null;
+document.getElementById('home')?.addEventListener('click',function(e){if(e.target.closest('.hot'))return;if(e.target.closest('.home-ele'))return;sf();});
+function sf(){clearTimeout(ft);const e=document.querySelector('.fine-msg');if(e)e.remove();const m=document.createElement('div');m.className='fine-msg';m.innerHTML='🍃 今天草原挺清亮的';document.getElementById('home').appendChild(m);requestAnimationFrame(()=>m.classList.add('show'));ft=setTimeout(()=>{m.classList.remove('show');setTimeout(()=>m.remove(),500);},2000);}
+function gp(){go(1);setTimeout(sp,400);}
+
+// ====== 暂停法 ======
+let ps=0,sn=null,ci=0,lastRecord=null;
+function clr(){ps=0;sn=null;lastRecord=null;document.getElementById('dim').classList.remove('on');['st1','st2','st3'].forEach(id=>document.getElementById(id).classList.remove('show'));document.getElementById('chips-body').classList.remove('show');document.getElementById('chips-need').classList.remove('show');document.getElementById('phrase').classList.remove('show');document.getElementById('replay').classList.remove('show');document.getElementById('alt-phrase')?.remove();}
+function sp(){clr();hidePauseIdle();ps=1;document.getElementById('st1').classList.add('show');}
+
+// 停：点击任意处 → 息屏；语言转换阶段：点击空白处 → 草原
+document.getElementById('pause').addEventListener('click',function(e){
+  if(ps===4){
+    if(e.target.closest('#phrase')||e.target.closest('#replay')||e.target.closest('#alt-phrase'))return;
+    go(2); return;
+  }
+  if(ps!==1)return;
+  if(e.target.closest('.idle'))return; // idle 层点击不触发
+  ps=1.5;
+  const d=document.getElementById('dim');
+  d.classList.add('on');
+  document.getElementById('st1').classList.remove('show');
+  pt=setTimeout(()=>{d.classList.remove('on');e2();},2500);
+});
+
+// 看
+function e2(){ps=2;document.getElementById('st1').classList.remove('show');document.getElementById('st2').classList.add('show');document.getElementById('chips-body').classList.add('show');}
+document.querySelectorAll('#chips-body .chip').forEach(c=>{c.onclick=function(){if(ps!==2)return;document.querySelectorAll('#chips-body .chip').forEach(x=>x.classList.remove('lit'));this.classList.add('lit');ps=2.5;pt=setTimeout(()=>{document.getElementById('chips-body').classList.remove('show');e3();},350);};});
+
+// 问
+function e3(){ps=3;document.getElementById('st2').classList.remove('show');document.getElementById('st3').classList.add('show');document.getElementById('chips-need').classList.add('show');}
+document.querySelectorAll('#chips-need .chip').forEach(c=>{c.onclick=function(){if(ps!==3)return;document.querySelectorAll('#chips-need .chip').forEach(x=>x.classList.remove('lit'));this.classList.add('lit');sn=needMap[this.dataset.label]||'安全感';ps=3.5;
+  const bodyChip=document.querySelector('#chips-body .chip.lit');
+  const body=bodyChip?bodyChip.dataset.label:'说不上来';
+  lastRecord={id:Date.now(),ts:Date.now(),date:today(),body,need:sn,touched:false,phraseIndex:ci};
+  addRecord(lastRecord);
+  pt=setTimeout(()=>{document.getElementById('chips-need').classList.remove('show');sp2();},350);};});
+
+// 语言转换
+function sp2(){ps=4;document.getElementById('st3').classList.remove('show');const po=P[sn]||P['安全感'];const tx=po[ci%po.length];const el=document.getElementById('phrase');el.innerHTML=tx+'<span class="touch" id="pt" onclick="ot()">这句话，有碰到你吗？</span>';el.classList.add('show');document.getElementById('replay').classList.add('show');const a=document.createElement('div');a.id='alt-phrase';a.className='alt-phrase';a.textContent='不对味？再换一句';a.onclick=cp;document.getElementById('pause').appendChild(a);setTimeout(()=>a.classList.add('show'),600);}
+function cp(){ci++;if(lastRecord){lastRecord.phraseIndex=ci;saveRecords();}const po=P[sn]||P['安全感'];const tx=po[ci%po.length];const el=document.getElementById('phrase');el.classList.remove('show');setTimeout(()=>{el.innerHTML=tx+'<span class="touch" id="pt" onclick="ot()">这句话，有碰到你吗？</span>';el.classList.add('show');},300);}
+let tc=0;
+function ot(){
+  tc++;
+  if(lastRecord){lastRecord.touched=true;saveRecords();}
+  const el=document.getElementById('phrase');
+  const m=tc===1?'🫶 收到了。它也在你心里留了个脚印。':'👣 又一个脚印。你正在一点点理解自己。';
+  el.innerHTML=m;el.classList.remove('show');setTimeout(()=>el.classList.add('show'),300);
+}
+function rp(){clr();tc=0;ci=0;ps=1;hidePauseIdle();document.getElementById('st1').classList.add('show');setTimeout(()=>{const d=document.getElementById('dim');d.classList.add('on');document.getElementById('st1').classList.remove('show');pt=setTimeout(()=>{d.classList.remove('on');e2();},2500);},1200);}
+document.getElementById('replay')?.addEventListener('click',function(){if(ps>=3.5||ps===0)rp();});
+</script>
+</body>
+</html>

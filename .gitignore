@@ -1,0 +1,14 @@
+# macOS
+.DS_Store
+
+# WorkBuddy local state
+.workbuddy/
+
+# Logs
+*.log
+
+# Temp files
+*.tmp
+
+# Screenshots can be regenerated; keep repo lean
+screens/

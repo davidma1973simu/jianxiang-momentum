@@ -1,0 +1,148 @@
+// 见象 Momentum · 应用入口
+// P0 核心：草原（首屏）→ 大象暂停法。极简，无 Tab、无导航栏。
+import React, { useEffect, useState, useRef } from 'react';
+import { View, Text, StyleSheet, Pressable, Animated, SafeAreaView } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
+import HomeScreen from './src/screens/HomeScreen';
+import PauseScreen from './src/screens/PauseScreen';
+import MorningScreen from './src/screens/MorningScreen';
+import EveningScreen from './src/screens/EveningScreen';
+import FlightScreen from './src/screens/FlightScreen';
+import PrairieScreen from './src/screens/PrairieScreen';
+import FourStepsScreen from './src/screens/FourStepsScreen';
+import HelpFilterScreen from './src/screens/HelpFilterScreen';
+import OnboardScreen from './src/screens/OnboardScreen';
+import BottomNav from './src/components/BottomNav';
+import { initSoundscape } from './src/sound/soundscape';
+import { colors, font } from './src/theme/tokens';
+import { getSettings as getAppSettings, setSettings } from './src/data/store';
+
+export default function App() {
+  const [screen, setScreen] = useState('home'); // 'home' | 'pause' | 'morning' | 'evening' | 'flight' | 'prairie' | 'four' | 'help'
+  const [flightOn, setFlightOn] = useState(false); // 飞行上下文：进入暂停法后保持
+  const [onBoard, setOnBoard] = useState(false); // 首次引导
+  const [ready, setReady] = useState(false); // 设置是否已加载
+  const fade = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    initSoundscape();
+    getAppSettings().then((s) => {
+      if (!s.seenOnboard) setOnBoard(true);
+      setReady(true);
+    });
+  }, []);
+
+  function transitionTo(next) {
+    if (next === screen) return; // 已在当前屏，避免无谓重挂
+    // 呼吸式淡入淡出过渡（无箭头、无滑动）
+    Animated.timing(fade, { toValue: 0, duration: 450, useNativeDriver: true }).start(() => {
+      setScreen(next);
+      setFlightOn(false); // 离开当前流程即复位飞行上下文
+      Animated.timing(fade, { toValue: 1, duration: 600, useNativeDriver: true }).start();
+    });
+  }
+
+  return (
+    <SafeAreaView style={styles.safe}>
+      <StatusBar style="dark" />
+      {!ready ? (
+        <View style={styles.fill} />
+      ) : onBoard ? (
+        <OnboardScreen
+          onDone={() => {
+            setSettings({ seenOnboard: true });
+            setOnBoard(false);
+          }}
+        />
+      ) : (
+        <>
+          <Animated.View style={[styles.fill, { opacity: fade }]}>
+            {screen === 'home' && (
+              <HomeScreen
+                onEnterPause={() => transitionTo('pause')}
+                onEnterMorning={() => transitionTo('morning')}
+                onEnterEvening={() => transitionTo('evening')}
+                onEnterPrairie={() => transitionTo('prairie')}
+                onEnterFlight={() => {
+                  setFlightOn(true);
+                  transitionTo('flight');
+                }}
+              />
+            )}
+            {screen === 'flight' && (
+              <FlightScreen
+                onStart={() => transitionTo('pause')}
+                onExit={() => {
+                  setFlightOn(false);
+                  transitionTo('home');
+                }}
+              />
+            )}
+            {screen === 'pause' && (
+              <PauseScreen
+                flight={flightOn}
+                onExit={() => {
+                  setFlightOn(false);
+                  transitionTo('home');
+                }}
+                onEnterPrairie={() => {
+                  setFlightOn(false);
+                  transitionTo('prairie');
+                }}
+                onEnterFour={() => {
+                  setFlightOn(false);
+                  transitionTo('four');
+                }}
+                onEnterHelp={() => {
+                  setFlightOn(false);
+                  transitionTo('help');
+                }}
+              />
+            )}
+            {screen === 'prairie' && <PrairieScreen onExit={() => transitionTo('home')} />}
+            {screen === 'four' && (
+              <FourStepsScreen
+                onExit={() => transitionTo('home')}
+                onEnterPrairie={() => transitionTo('prairie')}
+              />
+            )}
+            {screen === 'help' && (
+              <HelpFilterScreen
+                onExit={() => transitionTo('home')}
+                onEnterPrairie={() => transitionTo('prairie')}
+              />
+            )}
+            {screen === 'morning' && <MorningScreen onExit={() => transitionTo('home')} />}
+            {screen === 'evening' && <EveningScreen onExit={() => transitionTo('home')} />}
+          </Animated.View>
+
+          {/* 全局顶部「见象」= 回首页（草原 + 大象暂停法）。每屏可达 */}
+          <Pressable style={styles.homeHot} onPress={() => transitionTo('home')} hitSlop={10}>
+            <Text style={styles.brand}>见 象</Text>
+          </Pressable>
+
+          {/* 全局底栏：四个入口，严格出现在每一屏 */}
+          <BottomNav current={screen} onNavigate={(k) => transitionTo(k)} />
+        </>
+      )}
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  safe: { flex: 1, backgroundColor: colors.bg },
+  fill: { flex: 1 },
+  homeHot: {
+    position: 'absolute',
+    top: 18,
+    alignSelf: 'center',
+    paddingHorizontal: 30,
+    paddingVertical: 8,
+    zIndex: 60,
+  },
+  brand: {
+    textAlign: 'center',
+    ...font.brand,
+    opacity: 0.6,
+  },
+});
